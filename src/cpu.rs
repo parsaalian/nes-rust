@@ -51,11 +51,11 @@ impl Registers {
         self.y = y;
     }
 
-    fn get_pc(&self) -> u16 {
+    fn get_pc(&mut self) -> u16 {
         self.pc
     }
 
-    fn set_pc(&self, pc: u16) {
+    fn set_pc(&mut self, pc: u16) {
         self.pc = pc;
     }
 
@@ -309,16 +309,16 @@ impl ALU {
         let carry: bool = (((shifted16 & 0x0100) >> 8) & 0b1) == 1;
         (*self.flags_register.borrow_mut()).set_carry(carry);
         (*self.flags_register.borrow_mut()).set_zero(shift_result == 0);
-        (*self.flags_register.borrow_mut()).set_negative(((shift_result >> 8) & 0b1) == 1);
+        (*self.flags_register.borrow_mut()).set_negative(((shift_result >> 7) & 0b1) == 1);
         shift_result
     }
 
     fn logical_shift_right(&mut self, value1: u8) -> u8 {
-        let old_bit: bool = ((value1 & 0b1) == 1;
+        let old_bit: bool = (value1 & 0b1) == 1;
         let shift_result = value1 >> 1;
         (*self.flags_register.borrow_mut()).set_carry(old_bit);
         (*self.flags_register.borrow_mut()).set_zero(shift_result == 0);
-        (*self.flags_register.borrow_mut()).set_negative(((shift_result >> 8) & 0b1) == 1);
+        (*self.flags_register.borrow_mut()).set_negative(((shift_result >> 7) & 0b1) == 1);
         shift_result
     }
 
@@ -604,22 +604,22 @@ impl CPU {
                 or_result
             }
 
-            Instruction::PHA => {
+            Instruction::PHA(addressing_mode) => {
                 // TODO: implement stack
                 0
             }
 
-            Instruction::PHP => {
+            Instruction::PHP(addressing_mode) => {
                 // TODO: implement stack
                 0
             }
 
-            Instruction::PLA => {
+            Instruction::PLA(addressing_mode) => {
                 // TODO: implement stack
                 0
             }
 
-            Instruction::PLP => {
+            Instruction::PLP(addressing_mode) => {
                 // TODO: implement stack
                 0
             }
