@@ -1,3 +1,4 @@
+use std::marker::Copy;
 use std::collections::HashMap;
 
 pub struct InstructionReader {
@@ -107,8 +108,18 @@ pub struct Instruction {
     address: AddressingMode,
 }
 
+impl Instruction {
+    pub fn get_value(&self) -> InstructionType {
+        self.instruction
+    }
+
+    pub fn get_address(&self) -> AddressingMode {
+        self.address
+    }
+}
+
 custom_derive! {
-    #[derive(Debug, EnumFromStr)]
+    #[derive(Debug, EnumFromStr, Copy, Clone)]
     pub enum InstructionType {
         // LoadStoreInstructions
         LDA, LDX, LDY, STA, STX, STY,
@@ -135,7 +146,7 @@ custom_derive! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum AddressingMode {
     Implied,
     Accumulator,

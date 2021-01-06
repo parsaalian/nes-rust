@@ -9,11 +9,11 @@ impl Memory {
         }
     }
 
-    pub fn get_byte(&mut self, location: usize) -> u8 {
-        self.bytes[location]
+    pub fn get_byte(&mut self, location: u16) -> u8 {
+        self.bytes[location as usize]
     }
 
-    pub fn set_byte(&mut self, location: usize, value: u8) {
-        self.bytes[location] = value;
+    pub fn set_byte(&mut self, location: u16, value: u8) {
+        self.bytes[location as usize] = value;
     }
 }
