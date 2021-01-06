@@ -69,6 +69,40 @@ impl CPU {
             }
 
             // Stack Operations
+            InstructionType::TSX => {
+                let stack_pointer = self.registers.get_register(RegisterType::S);
+                self.registers.set_register(RegisterType::X, stack_pointer);
+                (*self.flags_register.borrow_mut()).set_zero(stack_pointer == 0);
+                (*self.flags_register.borrow_mut()).set_negative(((stack_pointer >> 7) & 0b1) == 1);
+                self.pc_inc();
+            }
+            InstructionType::TXS => {
+                let value = self.registers.get_register(RegisterType::X);
+                self.registers.set_register(RegisterType::S, value);
+                self.pc_inc();
+            }
+            InstructionType::PHA => {
+                let value = self.registers.get_register(RegisterType::A);
+                self.push(value);
+                self.pc_inc();
+            }
+            InstructionType::PHP => {
+                let status_flags: u8 = *self.flags_register.borrow_mut();
+                self.push(status_flags);
+                self.pc_inc();
+            }
+            InstructionType::PLA => {
+                let value = self.pop();
+                self.registers.set_register(RegisterType::A, value);
+                (*self.flags_register.borrow_mut()).set_zero(value == 0);
+                (*self.flags_register.borrow_mut()).set_negative(((value >> 7) & 0b1) == 1);
+                self.pc_inc();
+            }
+            InstructionType::PLP => {
+                let value = self.pop();
+                (*self.flags_register.borrow_mut()).load(value);
+                self.pc_inc();
+            }
 
             // Logical
             InstructionType::AND => {
@@ -198,11 +232,17 @@ impl CPU {
             }
             InstructionType::JSR => {
                 let pc = self.registers.get_pc();
-                // TODO: push pc to stack
+                let msb = ((pc & 0xff00) >> 8) as u8;
+                let lsb = (pc & 0x00ff) as u8;
+                self.push(msb);
+                self.push(lsb);
                 self.registers.set_pc(address);
             }
             InstructionType::RTS => {
-                // TODO: pop pc from stack
+                let lsb = self.pop() as u16;
+                let msb = self.pop() as u16;
+                let address = msb * 256 + lsb;
+                self.registers.set_pc(address);
             }
 
             // Branch
@@ -287,6 +327,20 @@ impl CPU {
         self.registers.set_register(to, register_value);
         (*self.flags_register.borrow_mut()).set_zero(register_value == 0);
         (*self.flags_register.borrow_mut()).set_negative(((register_value >> 7) & 0b1) == 1);
+    }
+
+    // Stack Operations
+    fn push(&mut self, value: u8) {
+        let address = (self.registers.get_register(RegisterType::S) as u16) + 0x0100;
+        (*self.memory.borrow_mut()).set_byte(address, value);
+        self.registers.push_stack();
+    }
+
+    fn pop(&mut self) -> u8 {
+        let address = (self.registers.get_register(RegisterType::S) as u16) + 0x0100;
+        let value = (*self.memory.borrow_mut()).get_byte(address);
+        self.registers.pop_stack();
+        value
     }
 
     // Logical Functions

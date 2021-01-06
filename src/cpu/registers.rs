@@ -40,14 +40,19 @@ impl Registers {
             RegisterType::Y => {
                 self.y = value;
             }
-            RegisterType::S => {
-                self.s = value;
-            }
             RegisterType::P => {
                 self.p = value;
             }
             _ => panic!(),
         }
+    }
+
+    pub fn push_stack(&mut self) {
+        self.s = self.s + 1;
+    }
+
+    pub fn pop_stack(&mut self) {
+        self.s = self.s - 1;
     }
 
     pub fn get_pc(&mut self) -> u16 {
@@ -93,6 +98,15 @@ impl FlagsRegister {
             zero: false,
             carry: false,
         }
+    }
+
+    pub fn load(&mut self, bytes: u8) {
+        self.negative = ((byte >> NEGATIVE_FLAG_BYTE_POSITION) & 0b1) != 0;
+        self.overflow = ((byte >> OVERFLOW_FLAG_BYTE_POSITION) & 0b1) != 0;
+        self.decimal = ((byte >> DECIMAL_FLAG_BYTE_POSITION) & 0b1) != 0;
+        self.interrupt = ((byte >> OVERFLOW_FLAG_BYTE_POSITION) & 0b1) != 0;
+        self.zero = ((byte >> ZERO_FLAG_BYTE_POSITION) & 0b1) != 0;
+        self.carry = ((byte >> OVERFLOW_FLAG_BYTE_POSITION) & 0b1) != 0;
     }
 
     pub fn set_negative(&mut self, value: bool) {

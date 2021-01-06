@@ -118,6 +118,7 @@ impl Instruction {
     }
 }
 
+// TODO: unofficial opcodes http://wiki.nesdev.com/w/index.php/Programming_with_unofficial_opcodes
 custom_derive! {
     #[derive(Debug, EnumFromStr, Copy, Clone)]
     pub enum InstructionType {
